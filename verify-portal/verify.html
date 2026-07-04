@@ -104,8 +104,8 @@
 
 <script>
   // ====== EDIT THESE TWO LINES ONLY ======
-  const SHEETDB_API_URL = "https://sheetdb.io/api/v1/REPLACE_WITH_YOUR_ID";
-  const INSTITUTE_NAME = "HSE Academy Pvt Ltd";
+  const SHEETDB_API_URL = "https://sheetdb.io/api/v1/wd149he8675tv";
+  const INSTITUTE_NAME = "IOSH (Institution of Occupational Safety and Health)";
   // ========================================
 
   const params = new URLSearchParams(window.location.search);
@@ -137,7 +137,7 @@
             `to <strong>${name}</strong> on <strong>${issueDate}</strong>`;
 
           if (certFile) {
-            certImage.src = "certificates/" + certFile;
+            certImage.src = certFile;
             document.querySelector(".cert-wrapper").style.display = "block";
           } else {
             document.querySelector(".cert-wrapper").style.display = "none";
