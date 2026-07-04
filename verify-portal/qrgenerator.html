@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR Code Generator - Certificate Verification</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f4f5f7;
+    margin: 0;
+    padding: 40px 20px;
+    color: #222;
+  }
+  .card {
+    max-width: 420px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+    padding: 30px;
+    text-align: center;
+  }
+  h2 { margin-top: 0; font-size: 20px; color: #0c7a4b; }
+  input {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 14px;
+  }
+  button {
+    background: #0c7a4b;
+    color: #fff;
+    border: none;
+    padding: 12px 24px;
+    font-size: 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+  }
+  button:hover { background: #095e3a; }
+  #qrResult {
+    margin-top: 24px;
+  }
+  #qrcode {
+    display: inline-block;
+    padding: 16px;
+    background: #fff;
+    border: 1px solid #eee;
+  }
+  #linkText {
+    margin-top: 12px;
+    font-size: 13px;
+    color: #555;
+    word-break: break-all;
+  }
+  #downloadBtn {
+    display: none;
+    margin-top: 14px;
+    background: #1a3f8f;
+  }
+  #downloadBtn:hover { background: #12306e; }
+</style>
+</head>
+<body>
+
+  <div class="card">
+    <h2>Generate Verification QR Code</h2>
+    <p style="font-size:14px;color:#666;margin-top:-8px;">Enter the Certificate Number to create its QR code</p>
+
+    <input type="text" id="certNumber" placeholder="e.g. 137679">
+    <button onclick="generateQR()">Generate QR Code</button>
+
+    <div id="qrResult">
+      <div id="qrcode"></div>
+      <div id="linkText"></div>
+      <button id="downloadBtn" onclick="downloadQR()">Download QR Image</button>
+    </div>
+  </div>
+
+<script>
+  // ====== EDIT THIS LINE ONLY ======
+  const BASE_VERIFY_URL = "https://yourusername.github.io/verify.html";
+  // ==================================
+
+  let qrCodeInstance = null;
+
+  function generateQR() {
+    const certNumber = document.getElementById("certNumber").value.trim();
+    if (!certNumber) {
+      alert("Please enter a certificate number.");
+      return;
+    }
+
+    const fullLink = `${BASE_VERIFY_URL}?id=${encodeURIComponent(certNumber)}`;
+
+    document.getElementById("qrcode").innerHTML = "";
+    qrCodeInstance = new QRCode(document.getElementById("qrcode"), {
+      text: fullLink,
+      width: 220,
+      height: 220,
+      colorDark: "#000000",
+      colorLight: "#ffffff",
+    });
+
+    document.getElementById("linkText").textContent = fullLink;
+    document.getElementById("downloadBtn").style.display = "inline-block";
+  }
+
+  function downloadQR() {
+    const canvas = document.querySelector("#qrcode canvas");
+    if (!canvas) return;
+    const link = document.createElement("a");
+    const certNumber = document.getElementById("certNumber").value.trim();
+    link.download = `qr-${certNumber}.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  }
+</script>
+
+</body>
+</html>

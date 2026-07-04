@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Certificate Verification</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #ffffff;
+    margin: 0;
+    padding: 0 0 40px 0;
+    color: #222;
+  }
+
+  /* Top logo bar - institute logo left, SmartVerify+ logo right */
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 22px 20px 10px 20px;
+  }
+  .top-bar img.institute-logo { height: 55px; }
+  .top-bar img.sv-logo { height: 55px; }
+
+  /* Status banner - matches IOSH SmartVerify green box exactly */
+  .status-banner {
+    max-width: 720px;
+    margin: 20px auto;
+    background: #0c7a4b;
+    color: #fff;
+    border-radius: 4px;
+    padding: 24px 26px;
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+    font-size: 19px;
+    line-height: 1.55;
+  }
+  .status-banner.invalid { background: #b02a2a; }
+  .status-banner .icon {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    margin-top: 3px;
+  }
+
+  .cert-wrapper {
+    max-width: 720px;
+    margin: 0 auto;
+    background: #e9e9ea;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 18px;
+  }
+  .cert-frame {
+    background: #fff;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  }
+  .cert-frame img { width: 100%; display: block; }
+
+  .loading, .not-found {
+    max-width: 720px;
+    margin: 60px auto;
+    text-align: center;
+    color: #555;
+    font-size: 17px;
+    padding: 0 20px;
+  }
+</style>
+</head>
+<body>
+
+  <div class="top-bar">
+    <img class="institute-logo" src="assets/institute-logo.png" alt="Institute Logo">
+    <img class="sv-logo" src="assets/smartverify-logo.png" alt="SmartVerify+">
+  </div>
+
+  <div id="loadingMsg" class="loading">Checking certificate&hellip;</div>
+
+  <div id="resultArea" style="display:none;">
+    <div id="statusBanner" class="status-banner">
+      <div class="icon">&#10003;</div>
+      <div id="statusText"></div>
+    </div>
+
+    <div class="cert-wrapper">
+      <div class="cert-frame">
+        <img id="certImage" src="" alt="Certificate">
+      </div>
+    </div>
+  </div>
+
+  <div id="notFoundMsg" class="not-found" style="display:none;"></div>
+
+<script>
+  // ====== EDIT THESE TWO LINES ONLY ======
+  const SHEETDB_API_URL = "https://sheetdb.io/api/v1/REPLACE_WITH_YOUR_ID";
+  const INSTITUTE_NAME = "HSE Academy Pvt Ltd";
+  // ========================================
+
+  const params = new URLSearchParams(window.location.search);
+  const certId = params.get("id");
+
+  const loadingMsg = document.getElementById("loadingMsg");
+  const resultArea = document.getElementById("resultArea");
+  const notFoundMsg = document.getElementById("notFoundMsg");
+  const statusText = document.getElementById("statusText");
+  const certImage = document.getElementById("certImage");
+
+  if (!certId) {
+    loadingMsg.style.display = "none";
+    notFoundMsg.style.display = "block";
+    notFoundMsg.textContent = "⚠️ No Credential ID provided in the link.";
+  } else {
+    fetch(`${SHEETDB_API_URL}/search?CertificateNumber=${encodeURIComponent(certId)}`)
+      .then(res => res.json())
+      .then(data => {
+        loadingMsg.style.display = "none";
+        if (Array.isArray(data) && data.length > 0) {
+          const record = data[0];
+          const name = record.Name || "Unknown";
+          const issueDate = record.IssueDate || "Unknown Date";
+          const certFile = record.CertificateFile || "";
+
+          statusText.innerHTML =
+            `This document is valid and was issued by <strong>${INSTITUTE_NAME}</strong> ` +
+            `to <strong>${name}</strong> on <strong>${issueDate}</strong>`;
+
+          if (certFile) {
+            certImage.src = "certificates/" + certFile;
+            document.querySelector(".cert-wrapper").style.display = "block";
+          } else {
+            document.querySelector(".cert-wrapper").style.display = "none";
+          }
+
+          resultArea.style.display = "block";
+        } else {
+          notFoundMsg.style.display = "block";
+          notFoundMsg.textContent = "❌ No certificate found for this ID. Please check the Credential ID / QR code and try again.";
+        }
+      })
+      .catch(err => {
+        loadingMsg.style.display = "none";
+        notFoundMsg.style.display = "block";
+        notFoundMsg.textContent = "⚠️ Could not reach verification server. Please try again later.";
+        console.error(err);
+      });
+  }
+</script>
+
+</body>
+</html>
